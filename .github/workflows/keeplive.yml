@@ -20,7 +20,7 @@ jobs:
         run: |
           # 定义需要访问的网址数组
           URLS=(
-            "https://potato.tomatolover.qzz.io/"
+            "https://huggingface.tomatolover.qzz.io/"
             "https://itchy-janean-tomato1over-d7f4b8d7.koyeb.app/"
           )
 
