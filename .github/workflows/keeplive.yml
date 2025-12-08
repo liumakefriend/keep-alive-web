@@ -19,7 +19,8 @@ jobs:
           # 定义需要访问的网址数组
           URLS=(
             "https://huggingface.ber2y.de5.net/"
-            "https://itchy-janean-tomato1over-d7f4b8d7.koyeb.app/"
+             "https://koyeb.ber2y.de5.net/"
+            # "https://itchy-janean-tomato1over-d7f4b8d7.koyeb.app/"
           )
 
           # 循环 5 次
