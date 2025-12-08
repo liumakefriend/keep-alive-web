@@ -1,162 +1,52 @@
-# name: Cloud Apps Scheduler (Anti-Ban)
+on:
+  # 计划任务触发
+  schedule:
+    # 每天北京时间 00:00 运行 (由于 GitHub 使用 UTC 时间，所以设定为 UTC 16:00)
+    - cron: '0 16 * * *'
+  # 手动触发 (方便测试)
+  workflow_dispatch:
 
-# on:
-#   schedule:
-#     # 每天 UTC 20:00 触发 (对应北京时间 04:00) -> 执行关闭
-#     - cron: '0 20 * * *'
-#     # 每天 UTC 22:00 触发 (对应北京时间 06:00) -> 执行开启
-#     - cron: '0 22 * * *'
-#   # 允许手动点击按钮触发 (用于测试)
-#   workflow_dispatch:
-
-# jobs:
-#   manage-resources:
-#     runs-on: ubuntu-latest
-#     steps:
-#       # ----------------------------------------------------------------
-#       # 第一步：判断当前时间，决定是 "开启" 还是 "关闭"
-#       # ----------------------------------------------------------------
-#       - name: Check Time & Set Mode
-#         id: check_mode
-#         run: |
-#           # 获取当前 UTC 小时 (00-23)
-#           CURRENT_HOUR=$(date -u +%H)
-#           echo "Current UTC Hour: $CURRENT_HOUR"
-
-#           # 逻辑判断
-#           # UTC 20点 (北京 4点) -> 关闭
-#           if [ "$CURRENT_HOUR" -eq "20" ]; then
-#             echo "action=stop" >> $GITHUB_OUTPUT
-#             echo "Status: Switching to SLEEP mode (4 AM CST)."
-            
-#           # UTC 22点 (北京 6点) -> 开启
-#           elif [ "$CURRENT_HOUR" -eq "22" ]; then
-#             echo "action=start" >> $GITHUB_OUTPUT
-#             echo "Status: Switching to WAKE UP mode (6 AM CST)."
-            
-#           # 手动触发时的默认逻辑 (可选：这里默认设为 start，方便手动测试开启)
-#           else
-#             echo "action=start" >> $GITHUB_OUTPUT
-#             echo "Status: Manual trigger detected, defaulting to START action."
-#           fi
-
-#       # ----------------------------------------------------------------
-#       # 第二步：Koyeb 操作
-#       # ----------------------------------------------------------------
-#       - name: Koyeb - Pause Service (Sleep)
-#         if: steps.check_mode.outputs.action == 'stop'
-#         env:
-#           KOYEB_TOKEN: ${{ secrets.KOYEB_API_TOKEN }}
-#           KOYEB_APP_ID: ${{ secrets.KOYEB_SERVICE_ID }}
-#         run: |
-#           UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-          
-#           echo "Pausing Koyeb Service..."
-#           curl -A "$UA" -X POST "https://app.koyeb.com/v1/services/${KOYEB_APP_ID}/pause" \
-#           -H "Authorization: Bearer ${KOYEB_TOKEN}" \
-#           -H "Content-Type: application/json"
-
-#       - name: Koyeb - Resume Service (Wake Up)
-#         if: steps.check_mode.outputs.action == 'start'
-#         env:
-#           KOYEB_TOKEN: ${{ secrets.KOYEB_API_TOKEN }}
-#           KOYEB_APP_ID: ${{ secrets.KOYEB_SERVICE_ID }}
-#         run: |
-#           UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-          
-#           echo "Resuming Koyeb Service..."
-#           curl -A "$UA" -X POST "https://app.koyeb.com/v1/services/${KOYEB_APP_ID}/resume" \
-#           -H "Authorization: Bearer ${KOYEB_TOKEN}" \
-#           -H "Content-Type: application/json"
-# # -------------------
-#       # Databricks Apps 操作 (专用逻辑)
-#       # -------------------
-      
-#       - name: Databricks App - Stop (Sleep)
-#         if: steps.check_mode.outputs.action == 'stop'
-#         env:
-#           # 你的 Databricks 域名 (带 https, 不带结尾斜杠)
-#           DB_HOST: "https://community.cloud.databricks.com"
-#           # 你的 Token (从 Secrets 读取)
-#           DB_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
-#           # 你的 App 名字 (从截图获取)
-#           APP_NAME: "ber2y-dataricks"
-#         run: |
-#           UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-          
-#           echo "Stopping Databricks App: $APP_NAME ..."
-          
-#           # 调用 Apps 专用停止接口
-#           curl -A "$UA" -X POST "${DB_HOST}/api/2.0/apps/${APP_NAME}/stop" \
-#           -H "Authorization: Bearer ${DB_TOKEN}" \
-#           -H "Content-Type: application/json"
-
-#       - name: Databricks App - Start (Wake Up)
-#         if: steps.check_mode.outputs.action == 'start'
-#         env:
-#           DB_HOST: "https://community.cloud.databricks.com"
-#           DB_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
-#           APP_NAME: "ber2y-dataricks"
-#         run: |
-#           UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-          
-#           echo "Starting Databricks App: $APP_NAME ..."
-          
-#           # 调用 Apps 专用启动接口
-#           curl -A "$UA" -X POST "${DB_HOST}/api/2.0/apps/${APP_NAME}/start" \
-#           -H "Authorization: Bearer ${DB_TOKEN}" \
-#           -H "Content-Type: application/json"
-# # name: Website Keep Alive
-
-# # on:
-# #   # 计划任务触发
-# #   schedule:
-# #     # 每天北京时间 00:00 运行 (由于 GitHub 使用 UTC 时间，所以设定为 UTC 16:00)
-# #     - cron: '0 16 * * *'
-# #   # 手动触发 (方便测试)
-# #   workflow_dispatch:
-
-# # jobs:
-# #   visit-websites:
-# #     runs-on: ubuntu-latest
+jobs:
+  visit-websites:
+    runs-on: ubuntu-latest
     
-# #     steps:
-# #       - name: Check out code (Optional)
-# #         uses: actions/checkout@v3
+    steps:
+      - name: Check out code (Optional)
+        uses: actions/checkout@v3
 
-# #       - name: Visit URLs 5 times
-# #         run: |
-# #           # 定义需要访问的网址数组
-# #           URLS=(
-# #             "https://huggingface.tomatolover.qzz.io/"
-# #             "https://itchy-janean-tomato1over-d7f4b8d7.koyeb.app/"
-# #           )
+      - name: Visit URLs 5 times
+        run: |
+          # 定义需要访问的网址数组
+          URLS=(
+            "https://huggingface.ber2y.de5.net/"
+            "https://itchy-janean-tomato1over-d7f4b8d7.koyeb.app/"
+          )
 
-# #           # 循环 5 次
-# #           for ((i=1; i<=5; i++)); do
-# #             echo "-----------------------------"
-# #             echo "开始第 $i 次访问循环..."
+          # 循环 5 次
+          for ((i=1; i<=5; i++)); do
+            echo "-----------------------------"
+            echo "开始第 $i 次访问循环..."
             
-# #             # 遍历每个 URL
-# #             for url in "${URLS[@]}"; do
-# #               echo "正在访问: $url"
-# #               # 使用 curl 发送请求
-# #               # -I: 只请求头部 (减少流量)
-# #               # -s: 静默模式
-# #               # -o /dev/null: 不输出内容
-# #               # -w: 输出 HTTP 状态码
-# #               # --user-agent: 伪装成浏览器，防止被拦截
-# #               code=$(curl -s -o /dev/null -w "%{http_code}" --user-agent "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36" "$url")
+            # 遍历每个 URL
+            for url in "${URLS[@]}"; do
+              echo "正在访问: $url"
+              # 使用 curl 发送请求
+              # -I: 只请求头部 (减少流量)
+              # -s: 静默模式
+              # -o /dev/null: 不输出内容
+              # -w: 输出 HTTP 状态码
+              # --user-agent: 伪装成浏览器，防止被拦截
+              code=$(curl -s -o /dev/null -w "%{http_code}" --user-agent "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36" "$url")
               
-# #               if [ "$code" == "200" ] || [ "$code" == "301" ] || [ "$code" == "302" ]; then
-# #                 echo "✅ 访问成功 (状态码: $code)"
-# #               else
-# #                 echo "⚠️ 访问可能异常 (状态码: $code)"
-# #               fi
-# #             done
+              if [ "$code" == "200" ] || [ "$code" == "301" ] || [ "$code" == "302" ]; then
+                echo "✅ 访问成功 (状态码: $code)"
+              else
+                echo "⚠️ 访问可能异常 (状态码: $code)"
+              fi
+            done
             
-# #             # 每次循环后暂停 10 秒，避免请求过快被防火墙拦截
-# #             echo "等待 10 秒..."
-# #             sleep 10
-# #           done
-# #           echo "所有访问任务完成！"
+            # 每次循环后暂停 10 秒，避免请求过快被防火墙拦截
+            echo "等待 10 秒..."
+            sleep 10
+          done
+          echo "所有访问任务完成！"
