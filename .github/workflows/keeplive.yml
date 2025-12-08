@@ -68,7 +68,44 @@ jobs:
           curl -A "$UA" -X POST "https://app.koyeb.com/v1/services/${KOYEB_APP_ID}/resume" \
           -H "Authorization: Bearer ${KOYEB_TOKEN}" \
           -H "Content-Type: application/json"
+# -------------------
+      # Databricks Apps 操作 (专用逻辑)
+      # -------------------
+      
+      - name: Databricks App - Stop (Sleep)
+        if: steps.check_mode.outputs.action == 'stop'
+        env:
+          # 你的 Databricks 域名 (带 https, 不带结尾斜杠)
+          DB_HOST: "https://community.cloud.databricks.com"
+          # 你的 Token (从 Secrets 读取)
+          DB_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+          # 你的 App 名字 (从截图获取)
+          APP_NAME: "ber2y-dataricks"
+        run: |
+          UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
           
+          echo "Stopping Databricks App: $APP_NAME ..."
+          
+          # 调用 Apps 专用停止接口
+          curl -A "$UA" -X POST "${DB_HOST}/api/2.0/apps/${APP_NAME}/stop" \
+          -H "Authorization: Bearer ${DB_TOKEN}" \
+          -H "Content-Type: application/json"
+
+      - name: Databricks App - Start (Wake Up)
+        if: steps.check_mode.outputs.action == 'start'
+        env:
+          DB_HOST: "https://community.cloud.databricks.com"
+          DB_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+          APP_NAME: "ber2y-dataricks"
+        run: |
+          UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+          
+          echo "Starting Databricks App: $APP_NAME ..."
+          
+          # 调用 Apps 专用启动接口
+          curl -A "$UA" -X POST "${DB_HOST}/api/2.0/apps/${APP_NAME}/start" \
+          -H "Authorization: Bearer ${DB_TOKEN}" \
+          -H "Content-Type: application/json"
 # name: Website Keep Alive
 
 # on:
