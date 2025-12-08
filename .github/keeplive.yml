@@ -68,39 +68,6 @@ jobs:
           curl -A "$UA" -X POST "https://app.koyeb.com/v1/services/${KOYEB_APP_ID}/resume" \
           -H "Authorization: Bearer ${KOYEB_TOKEN}" \
           -H "Content-Type: application/json"
-
-      # ----------------------------------------------------------------
-      # 第三步：Databricks 操作
-      # ----------------------------------------------------------------
-      - name: Databricks - Stop Cluster (Sleep)
-        if: steps.check_mode.outputs.action == 'stop'
-        env:
-          DB_HOST: ${{ secrets.DATABRICKS_HOST }}
-          DB_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
-          DB_CLUSTER: ${{ secrets.DATABRICKS_CLUSTER_ID }}
-        run: |
-          UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-          
-          echo "Stopping Databricks Cluster..."
-          curl -A "$UA" -X POST "${DB_HOST}/api/2.0/clusters/delete" \
-          -H "Authorization: Bearer ${DB_TOKEN}" \
-          -H "Content-Type: application/json" \
-          -d "{ \"cluster_id\": \"${DB_CLUSTER}\" }"
-
-      - name: Databricks - Start Cluster (Wake Up)
-        if: steps.check_mode.outputs.action == 'start'
-        env:
-          DB_HOST: ${{ secrets.DATABRICKS_HOST }}
-          DB_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
-          DB_CLUSTER: ${{ secrets.DATABRICKS_CLUSTER_ID }}
-        run: |
-          UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-          
-          echo "Starting Databricks Cluster..."
-          curl -A "$UA" -X POST "${DB_HOST}/api/2.0/clusters/start" \
-          -H "Authorization: Bearer ${DB_TOKEN}" \
-          -H "Content-Type: application/json" \
-          -d "{ \"cluster_id\": \"${DB_CLUSTER}\" }"
           
 # name: Website Keep Alive
 
