@@ -36,7 +36,7 @@ puppeteer.use(StealthPlugin());
   }
 
   // 2. 简单的 Cloudflare 等待逻辑
-  console.log("🛡️ 等待 5 秒，让 Cloudflare 五秒盾自动通过...");
+  console.log("🛡️ 等待 10 秒，让 Cloudflare 五秒盾自动通过...");
   await new Promise(r => setTimeout(r, 5000));
 
   // 截图查看是否卡在盾上
