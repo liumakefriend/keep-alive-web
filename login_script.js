@@ -23,7 +23,7 @@ puppeteer.use(StealthPlugin());
   await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
 
   // 1. 访问登录页面
-  const loginUrl = 'https://betadash.lunes.host/login'; // 假设登录页是这个，如果不是请修改
+  const loginUrl = 'https://betadash.lunes.host/servers/53360'; // 假设登录页是这个，如果不是请修改
   console.log(`🌐 正在前往登录页: ${loginUrl}`);
   
   try {
