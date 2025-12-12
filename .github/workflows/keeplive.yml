@@ -1,109 +1,37 @@
-name: Keep Alive Service
+name: Simulate Login (Method 2)
 
 on:
-  # 计划任务触发
   schedule:
-    # 策略优化：每 30 分钟运行一次 (每天 48 次)
-    # 相比原来的每 4 小时，这能更有效地防止服务休眠
-    - cron: '*/30 * * * *'
-  
-  # 手动触发
-  workflow_dispatch:
+    - cron: '0 0 * * *' # 每天运行
+  workflow_dispatch:    # 支持手动运行
 
 jobs:
-  visit-websites:
+  simulate_login:
     runs-on: ubuntu-latest
-    
+
     steps:
-      - name: Visit URLs
-        run: |
-          # 定义需要访问的网址数组
-          URLS=(
-            "https://huggingface.ber2y.de5.net/"
-            "https://koyeb.ber2y.de5.net/"
-            "https://koyeb.pitaya.de5.net/"
-            "https://clawcloud.pitaya.de5.net/"
-          )
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-          echo "🚀 开始本次保活巡查..."
-          
-          # 遍历每个 URL
-          for url in "${URLS[@]}"; do
-            echo "-----------------------------"
-            echo "正在访问: $url"
-            
-            # 使用 curl 发送请求
-            # --max-time 10: 设置超时时间为10秒，防止卡死浪费额度
-            # --retry 2: 如果失败自动重试2次，提高成功率
-            code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 --retry 2 --user-agent "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36" "$url")
-            
-            if [ "$code" == "200" ] || [ "$code" == "301" ] || [ "$code" == "302" ] || [ "$code" == "404" ]; then
-              echo "✅ 访问成功 (状态码: $code)"
-            else
-              echo "⚠️ 访问可能异常 (状态码: $code)"
-            fi
-            
-            # 这里的 sleep 仅仅是为了两个请求间稍微缓一下，不影响计费
-            sleep 2
-          done
-          
-          echo "-----------------------------"
-          echo "🎉 本次任务结束，释放资源。"
-          
-# on:
-#   # 计划任务触发
-#   schedule:
-#     # 每天北京时间 00:00 运行 (由于 GitHub 使用 UTC 时间，所以设定为 UTC 16:00)
-#     # - cron: '0 16 * * *'
-#     - cron: '0 */4 * * *'
-#   # 手动触发 (方便测试)
-#   workflow_dispatch:
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
 
-# jobs:
-#   visit-websites:
-#     runs-on: ubuntu-latest
-    
-#     steps:
-#       - name: Check out code (Optional)
-#         uses: actions/checkout@v3
+    - name: Install Dependencies
+      run: npm install
 
-#       - name: Visit URLs 5 times
-#         run: |
-#           # 定义需要访问的网址数组
-#           URLS=(
-#             "https://huggingface.ber2y.de5.net/"
-#              "https://koyeb.ber2y.de5.net/"
-#              "https://koyeb.pitaya.de5.net/"
-#              "https://clawcloud.pitaya.de5.net/"
-#              # "https://ebihxdllplbi.ap-northeast-1.clawcloudrun.com/"
-#             # "https://itchy-janean-tomato1over-d7f4b8d7.koyeb.app/"
-#           )
+    - name: Run Login Script
+      env:
+        LUNES_EMAIL: ${{ secrets.LUNES_EMAIL }}
+        LUNES_PASSWORD: ${{ secrets.LUNES_PASSWORD }}
+        TARGET_URL: ${{ secrets.TARGET_URL }}
+      run: node login_script.js
 
-#           # 循环 5 次
-#           for ((i=1; i<=5; i++)); do
-#             echo "-----------------------------"
-#             echo "开始第 $i 次访问循环..."
-            
-#             # 遍历每个 URL
-#             for url in "${URLS[@]}"; do
-#               echo "正在访问: $url"
-#               # 使用 curl 发送请求
-#               # -I: 只请求头部 (减少流量)
-#               # -s: 静默模式
-#               # -o /dev/null: 不输出内容
-#               # -w: 输出 HTTP 状态码
-#               # --user-agent: 伪装成浏览器，防止被拦截
-#               code=$(curl -s -o /dev/null -w "%{http_code}" --user-agent "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36" "$url")
-              
-#               if [ "$code" == "200" ] || [ "$code" == "301" ] || [ "$code" == "302" ]; then
-#                 echo "✅ 访问成功 (状态码: $code)"
-#               else
-#                 echo "⚠️ 访问可能异常 (状态码: $code)"
-#               fi
-#             done
-            
-#             # 每次循环后暂停 10 秒，避免请求过快被防火墙拦截
-#             echo "等待 300 秒..."
-#             sleep 300
-#           done
-#           echo "所有访问任务完成！"
+    # 关键步骤：如果脚本失败，把截图传上来，让你知道死在哪一步
+    - name: Upload Debug Screenshots
+      if: always() 
+      uses: actions/upload-artifact@v4
+      with:
+        name: debug-screenshots
+        path: "*.png"
