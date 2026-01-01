@@ -1,4 +1,1 @@
-streamlit
-requests
-PyGithub
-PyYAML
+Flask==3.0.0
